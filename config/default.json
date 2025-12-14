@@ -1,0 +1,240 @@
+{
+  "world": {
+    "max_population": 1000000,
+    "initial_population": 10000,
+    "region_count": 100,
+    "region_size": 1000.0,
+    "world_width": 10000.0,
+    "world_height": 10000.0,
+    "time_scale": 1.0,
+    "tick_rate": 60.0
+  },
+  "performance": {
+    "target_fps": 60.0,
+    "target_frame_time_ms": 16.67,
+    "thread_count": 0,
+    "thread_count_override": false,
+    "batch_size": 128,
+    "simd_enabled": true,
+    "parallel_processing": true,
+    "cache_line_size": 64,
+    "memory_pool_size_mb": 2048,
+    "enable_profiling": false
+  },
+  "simulation": {
+    "lod": {
+      "focus_region_count": 3,
+      "visible_region_count": 10,
+      "full_sim_update_frequency": 1,
+      "half_sim_update_frequency": 3,
+      "formula_sim_update_frequency": 30,
+      "lod_transition_smoothness": 0.5,
+      "auto_focus_enabled": true
+    },
+    "entity": {
+      "max_age": 120,
+      "birth_rate_base": 0.02,
+      "death_rate_base": 0.01,
+      "aging_rate": 1.0,
+      "enable_aging": true
+    },
+    "region": {
+      "max_capacity_multiplier": 1.5,
+      "resource_regeneration_rate": 0.1,
+      "migration_enabled": true,
+      "migration_rate": 0.001
+    }
+  },
+  "skills": {
+    "skill_count": 200,
+    "max_skill_level": 15,
+    "min_skill_level": 0,
+    "mortal_max_level": 9,
+    "divine_levels_enabled": false,
+    "divine_level_min": 10,
+    "divine_level_max": 15,
+    "progression": {
+      "base_probability_level_0": 0.1,
+      "base_probability_level_5": 0.01,
+      "base_probability_level_8": 0.001,
+      "base_probability_level_9": 0.0001,
+      "base_probability_level_10": 0.00001,
+      "base_probability_level_14": 0.000001,
+      "progression_curve_exponent": 2.0,
+      "activity_multiplier_active": 10.0,
+      "activity_multiplier_related": 2.0,
+      "activity_multiplier_inactive": 0.1,
+      "age_modifier_childhood": 1.5,
+      "age_modifier_adolescence": 1.2,
+      "age_modifier_prime": 1.0,
+      "age_modifier_middle_age": 0.8,
+      "age_modifier_elder": 0.9,
+      "enable_skill_decay": false,
+      "decay_probability": 0.0001
+    },
+    "hero_promotion": {
+      "skill_milestone_level": 6,
+      "renown_per_level_9": 10,
+      "renown_per_additional_level_9": 5,
+      "renown_per_divine_level": 50,
+      "top_percentile_threshold": 0.001,
+      "renown_top_percentile_min": 25,
+      "renown_top_percentile_max": 100
+    }
+  },
+  "heroes": {
+    "max_heroes": 1000,
+    "hero_percentage": 0.001,
+    "renown": {
+      "min_renown": 1,
+      "max_renown": 65535,
+      "local_hero_threshold": 100,
+      "regional_hero_threshold": 1000,
+      "national_hero_threshold": 10000,
+      "legendary_hero_threshold": 10001,
+      "decay_enabled": false,
+      "decay_rate_per_year": 1.0,
+      "decay_inactivity_years": 5.0
+    },
+    "influence": {
+      "local_hero_radius": 2,
+      "regional_hero_radius": 5,
+      "national_hero_radius": 10,
+      "legendary_hero_radius": 20,
+      "influence_update_frequency": 10,
+      "distance_modifier_exponent": 1.0,
+      "base_influence_divisor": 1000.0
+    },
+    "renown_sources": {
+      "combat": {
+        "monster_defeat_min": 50,
+        "monster_defeat_max": 500,
+        "criminal_defeat_min": 25,
+        "criminal_defeat_max": 200,
+        "battle_win_min": 100,
+        "battle_win_max": 1000,
+        "region_protection_min": 10,
+        "region_protection_max": 100
+      },
+      "skill": {
+        "level_15_renown": 10,
+        "additional_level_15_renown": 5,
+        "top_percentile_renown_min": 25,
+        "top_percentile_renown_max": 100
+      },
+      "lineage": {
+        "child_of_hero_min": 5,
+        "child_of_hero_max": 50,
+        "descendant_legendary_min": 10,
+        "descendant_legendary_max": 100,
+        "inheritance_percentage_min": 0.10,
+        "inheritance_percentage_max": 0.25,
+        "royalty_noble_bonus": true,
+        "royalty_noble_renown_min": 1,
+        "royalty_noble_renown_max": 50
+      },
+      "accomplishments": {
+        "discovery_min": 25,
+        "discovery_max": 150,
+        "founding_min": 50,
+        "founding_max": 300,
+        "conflict_resolution_min": 100,
+        "conflict_resolution_max": 500,
+        "legendary_deed_min": 200,
+        "legendary_deed_max": 1000
+      }
+    },
+    "influence_effects": {
+      "combat_security_min": 0.05,
+      "combat_security_max": 0.20,
+      "crafting_economy_min": 0.05,
+      "crafting_economy_max": 0.15,
+      "knowledge_education_min": 0.05,
+      "knowledge_education_max": 0.15,
+      "social_stability_min": 0.05,
+      "social_stability_max": 0.15
+    }
+  },
+  "races": {
+    "enabled": true,
+    "races": [
+      {
+        "id": 0,
+        "name": "Human",
+        "base_population_percentage": 0.60,
+        "lifespan_multiplier": 1.0,
+        "max_age": 80,
+        "skill_progression_multiplier": 1.0,
+        "preferred_regions": ["Urban", "Rural", "Plains"],
+        "preferred_region_weights": [1.0, 1.0, 0.8],
+        "avoided_regions": [],
+        "migration_tendency": 0.5,
+        "fertility_rate": 1.0,
+        "skill_affinities": {},
+        "skill_penalties": {}
+      },
+      {
+        "id": 1,
+        "name": "Elf",
+        "base_population_percentage": 0.15,
+        "lifespan_multiplier": 3.0,
+        "max_age": 300,
+        "skill_progression_multiplier": 0.6,
+        "preferred_regions": ["Forest", "Mountain"],
+        "preferred_region_weights": [1.5, 1.2],
+        "avoided_regions": ["Urban", "Desert"],
+        "migration_tendency": 0.2,
+        "fertility_rate": 0.4,
+        "skill_affinities": {
+          "archery": 1.3,
+          "nature_magic": 1.5,
+          "crafting": 1.2
+        },
+        "skill_penalties": {
+          "mining": 0.8,
+          "urban_skills": 0.7
+        }
+      }
+    ],
+    "interracial_breeding": {
+      "enabled": true,
+      "hybrid_race_probability": 0.3,
+      "inherit_race_probability": 0.7
+    }
+  },
+  "regions": {
+    "types": ["Urban", "Rural", "Forest", "Mountain", "Coastal", "Desert", "Plains"],
+    "default_capacity": 10000,
+    "capacity_variance": 0.5,
+    "resource_types": ["Food", "Materials", "Magic", "Trade"],
+    "trait_categories": 5,
+    "neighbor_connections_min": 2,
+    "neighbor_connections_max": 6,
+    "race_attraction_enabled": true
+  },
+  "events": {
+    "max_active_events": 100,
+    "event_queue_size": 1000,
+    "global_event_frequency": 0.001,
+    "regional_event_frequency": 0.01,
+    "individual_event_frequency": 0.1,
+    "event_history_size": 10000,
+    "cascade_probability": 0.1
+  },
+  "memory": {
+    "target_memory_per_entity_bytes": 200,
+    "max_memory_mb": 4096,
+    "entity_pool_size": 0,
+    "entity_pool_growth_factor": 1.5,
+    "enable_memory_tracking": false,
+    "memory_warning_threshold": 0.9
+  },
+  "rendering": {
+    "enable_visualization": true,
+    "entity_visualization": "representative",
+    "region_visualization": "full",
+    "update_visuals_every_n_ticks": 1,
+    "culling_enabled": true,
+    "lod_visual_detail": true
+  }
+}

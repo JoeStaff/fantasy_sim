@@ -1,0 +1,11 @@
+{
+  "name": "fantasy-sim",
+  "version": "1.0.0",
+  "description": "Anime Fantasy World/Life Simulator",
+  "dependencies": [
+    "sdl2",
+    "sdl2-image",
+    "sdl2-ttf",
+    "nlohmann-json"
+  ]
+}
