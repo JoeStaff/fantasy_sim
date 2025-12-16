@@ -1,4 +1,6 @@
 #include "Simulation/LODSystem.h"
+#include "Core/Config.h"
+#include <algorithm>
 
 namespace Simulation {
 
@@ -11,9 +13,14 @@ void LODSystem::Initialize() {
 }
 
 void LODSystem::UpdateLOD(const std::vector<RegionID>& focus_regions, u8 visible_region_count) {
-    // TODO: Implement LOD update
-    (void)focus_regions;
-    (void)visible_region_count;
+    // Set all focus regions to Full simulation
+    for (RegionID region_id : focus_regions) {
+        TransitionRegion(region_id, SimulationLOD::Full);
+    }
+    
+    // Note: Half and Formula LOD assignments are handled by WorldScene::UpdateSimulationLOD
+    // This method is called by SimulationManager::UpdateLOD() which is called from WorldScene
+    (void)visible_region_count;  // May be used for future optimizations
 }
 
 SimulationLOD LODSystem::GetRegionLOD(RegionID region_id) const {
@@ -50,6 +57,10 @@ void LODSystem::TransitionRegion(RegionID region_id, SimulationLOD new_lod) {
     // TODO: Implement smooth transitions
 }
 
+void LODSystem::SetRegionLOD(RegionID region_id, SimulationLOD lod) {
+    TransitionRegion(region_id, lod);
+}
+
 u32 LODSystem::GetUpdateFrequency(SimulationLOD lod) const {
     // TODO: Get from config
     switch (lod) {
@@ -65,3 +76,4 @@ u32 LODSystem::GetUpdateFrequency(SimulationLOD lod) const {
 }
 
 } // namespace Simulation
+

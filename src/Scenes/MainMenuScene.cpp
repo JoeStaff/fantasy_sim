@@ -35,8 +35,10 @@ std::string MainMenuScene::GetTitle() const {
 }
 
 void MainMenuScene::OnStartSelected() {
-    // TODO: Transition to game scene when implemented
-    // For now, do nothing
+    // Transition to world scene
+    if (scene_manager_) {
+        scene_manager_->ChangeScene("WorldScene");
+    }
 }
 
 void MainMenuScene::OnSettingsSelected() {

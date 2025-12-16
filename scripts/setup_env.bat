@@ -71,3 +71,6 @@ echo You can now run build.bat to build the project.
 echo.
 
 endlocal
+
+
+

@@ -19,9 +19,9 @@ using f64 = double;
 using EntityID = u64;
 constexpr EntityID INVALID_ENTITY_ID = 0;
 
-// Region ID type (max 255 regions)
-using RegionID = u8;
-constexpr RegionID INVALID_REGION_ID = 255;
+// Region ID type (supports up to 4 billion regions)
+using RegionID = u32;
+constexpr RegionID INVALID_REGION_ID = 0xFFFFFFFF;
 
 // Race ID type (max 255 races)
 using RaceID = u8;
@@ -39,3 +39,4 @@ enum class SimulationLOD : u8 {
     Half = 1,      // Reduced detail simulation
     Formula = 2    // Statistical/formula-based simulation
 };
+

@@ -1,5 +1,6 @@
-#include "Scenes/SceneManager.h"
 #include <iostream>
+
+#include "Scenes/SceneManager.h"
 
 namespace Game {
 

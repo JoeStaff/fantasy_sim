@@ -25,7 +25,7 @@ public:
     virtual void Update(f32 delta_time) = 0;
     
     // Entity destroyed callback (optional override)
-    virtual void OnEntityDestroyed(EntityID entity) {}
+    virtual void OnEntityDestroyed(EntityID entity) { (void)entity; }
     
     // Get required component signature
     Signature GetSignature() const { return signature_; }
@@ -194,3 +194,6 @@ void Coordinator::SetSystemSignature(Signature signature) {
 }
 
 } // namespace ECS
+
+
+

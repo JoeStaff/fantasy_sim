@@ -3,6 +3,8 @@
 #include <exception>
 
 int main(int argc, char* argv[]) {
+    (void)argc;  // Suppress unused parameter warning
+    (void)argv;  // Suppress unused parameter warning
     try {
         Game::Game game;
         
@@ -21,3 +23,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 }
+
+
+

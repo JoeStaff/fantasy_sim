@@ -31,6 +31,9 @@ public:
     // Transition region to new LOD
     void TransitionRegion(RegionID region_id, SimulationLOD new_lod);
     
+    // Set LOD for a region directly (used by WorldScene)
+    void SetRegionLOD(RegionID region_id, SimulationLOD lod);
+    
 private:
     struct RegionLODData {
         SimulationLOD current_lod = SimulationLOD::Formula;
@@ -44,3 +47,4 @@ private:
 };
 
 } // namespace Simulation
+

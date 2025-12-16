@@ -32,3 +32,6 @@ cd /d "%PROJECT_ROOT%"
 "%EXE_PATH%"
 
 endlocal
+
+
+

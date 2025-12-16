@@ -47,8 +47,16 @@ public:
     void SetTimeScale(f32 scale);
     f32 GetTimeScale() const { return time_scale_; }
     
-private:
+    // Initialize region grid
+    void InitializeRegionGrid(u16 grid_width, u16 grid_height, f32 region_size);
+    
+    // Update LOD system (called by WorldScene)
     void UpdateLOD();
+    
+    // Get LOD system (for WorldScene to set LODs directly)
+    LODSystem* GetLODSystem() { return lod_system_.get(); }
+    
+private:
     void UpdateRegions(f32 delta_time);
     void ProcessLODTransitions();
     
@@ -63,3 +71,4 @@ private:
 };
 
 } // namespace Simulation
+

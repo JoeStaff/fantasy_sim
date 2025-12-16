@@ -16,6 +16,7 @@ void SystemManager::OnEntityDestroyed(EntityID entity) {
 }
 
 void SystemManager::OnEntitySignatureChanged(EntityID entity, Signature signature) {
+    (void)entity;  // Suppress unused parameter warning
     // Notify systems if entity matches their signature
     for (auto& pair : systems_) {
         const Signature& system_signature = system_signatures_[pair.first];
@@ -62,3 +63,6 @@ void Coordinator::Update(f32 delta_time) {
 }
 
 } // namespace ECS
+
+
+

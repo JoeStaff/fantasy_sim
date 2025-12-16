@@ -72,6 +72,9 @@ bool SDLVideo::CreateWindow(const std::string& title, i32 width, i32 height, boo
         return false;
     }
     
+    // Enable alpha blending for semi-transparent rendering
+    SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+    
     window_handle_.ptr = window_;
     renderer_handle_.ptr = renderer_;
     

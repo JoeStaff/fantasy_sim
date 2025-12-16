@@ -84,3 +84,6 @@ echo "vcpkg toolchain: $VCPKG_DIR/scripts/buildsystems/vcpkg.cmake"
 echo ""
 echo "You can now run build.sh to build the project."
 echo ""
+
+
+

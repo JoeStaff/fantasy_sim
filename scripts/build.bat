@@ -87,3 +87,6 @@ if exist "%BUILD_DIR%\bin\Release\FantasySim.exe" (
 echo.
 
 endlocal
+
+
+

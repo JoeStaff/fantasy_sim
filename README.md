@@ -45,3 +45,6 @@ fantasy_sim/
 ## Configuration
 
 Edit `config/default.json` to customize simulation parameters. See `DESIGN_DOCUMENT.md` for detailed configuration options.
+
+
+

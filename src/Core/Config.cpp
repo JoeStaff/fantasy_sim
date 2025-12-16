@@ -85,6 +85,20 @@ void Configuration::ApplyDefaults() {
     skills.max_skill_level = 15;
     skills.mortal_max_level = 9;
     skills.divine_levels_enabled = false;
+    
+    // Region types (must match config/default.json)
+    regions.types = {"Urban", "Rural", "Forest", "Mountain", "Coastal", "Desert", "Plains", "Water", "River", "RiverSource"};
+    regions.default_capacity = 10000;
+    regions.capacity_variance = 0.5f;
+    regions.resource_types = {"Food", "Materials", "Magic", "Trade"};
+    regions.trait_categories = 5;
+    regions.neighbor_connections_min = 2;
+    regions.neighbor_connections_max = 6;
+    regions.race_attraction_enabled = true;
+    
+    // World grid settings
+    world.region_grid_width = 100;
+    world.region_grid_height = 100;
 }
 
 } // namespace Config

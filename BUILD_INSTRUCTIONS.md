@@ -138,3 +138,6 @@ Make sure all vcpkg packages are installed and the toolchain file is set correct
 ### Runtime errors (DLL not found on Windows)
 
 Copy SDL2 DLLs to the executable directory, or add vcpkg's bin directory to PATH.
+
+
+

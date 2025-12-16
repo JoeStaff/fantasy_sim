@@ -30,3 +30,6 @@ echo ""
 
 cd "$PROJECT_ROOT"
 "$EXE_PATH"
+
+
+

@@ -18,6 +18,8 @@ struct WorldConfig {
     f32 world_height = 10000.0f;
     f32 time_scale = 1.0f;
     f32 tick_rate = 60.0f;
+    u16 region_grid_width = 100;   // Grid width for region layout
+    u16 region_grid_height = 100;  // Grid height for region layout
 };
 
 // Performance configuration
@@ -39,6 +41,7 @@ struct SimulationConfig {
     struct LODConfig {
         u8 focus_region_count = 3;
         u8 visible_region_count = 10;
+        u8 neighbor_range = 1;  // Range of neighbors around selected region for full simulation
         u32 full_sim_update_frequency = 1;
         u32 half_sim_update_frequency = 3;
         u32 formula_sim_update_frequency = 30;
@@ -298,3 +301,4 @@ private:
 };
 
 } // namespace Config
+

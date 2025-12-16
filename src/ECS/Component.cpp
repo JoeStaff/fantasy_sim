@@ -15,3 +15,6 @@ void ComponentManager::OnEntityDestroyed(EntityID entity) {
 // Template specializations need to be in header, but we can keep non-template methods here
 
 } // namespace ECS
+
+
+

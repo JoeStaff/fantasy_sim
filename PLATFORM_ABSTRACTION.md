@@ -201,3 +201,6 @@ Then load from config:
 auto video_backend = config.platform.video_backend;
 video_ = PlatformFactory::CreateVideoFromString(video_backend);
 ```
+
+
+

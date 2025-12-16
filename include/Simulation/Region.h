@@ -27,6 +27,8 @@ public:
     // Getters
     RegionID GetID() const { return id_; }
     const std::string& GetType() const { return type_; }
+    const std::string& GetSubtype() const { return subtype_; }
+    void SetSubtype(const std::string& subtype) { subtype_ = subtype; }
     u32 GetPopulation() const { return population_count_; }
     u32 GetCapacity() const { return capacity_; }
     
@@ -67,6 +69,7 @@ public:
 private:
     RegionID id_;
     std::string type_;
+    std::string subtype_;  // Influences color (e.g., "Mountain" for rural near mountains)
     u32 population_count_ = 0;
     u32 capacity_ = 10000;
     
@@ -97,3 +100,4 @@ private:
 };
 
 } // namespace Simulation
+

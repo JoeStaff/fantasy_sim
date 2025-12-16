@@ -29,3 +29,6 @@ struct Inhabitant {
 };
 
 } // namespace Components
+
+
+

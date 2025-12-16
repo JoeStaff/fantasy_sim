@@ -1,10 +1,14 @@
+#include <iostream>
+#include <chrono>
+#include <string>
+#include <memory>
+
 #include "Game/Game.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/QuitMenuScene.h"
+#include "Scenes/WorldScene.h"
 #include "ECS/System.h"
-#include <iostream>
-#include <chrono>
 
 namespace Game {
 
@@ -178,6 +182,7 @@ bool Game::InitializePlatform() {
         
         bool font_loaded = false;
         for (const char* path : font_paths) {
+            (void)path;  // Suppress unused variable warning
             /*if (video->LoadFont(path, 32)) {
                 font_loaded = true;
                 break;
@@ -230,6 +235,7 @@ void Game::InitializeScenes() {
     // Register scenes
     scene_manager_->RegisterScene(std::make_unique<MainMenuScene>());
     scene_manager_->RegisterScene(std::make_unique<QuitMenuScene>());
+    scene_manager_->RegisterScene(std::make_unique<WorldScene>());
     
     // Start with main menu
     scene_manager_->ChangeScene("MainMenu");
