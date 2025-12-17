@@ -11,6 +11,8 @@ namespace Simulation {
 // Forward declarations
 class Region;
 class LODSystem;
+class World;
+class WorldGenerator;
 
 // Simulation manager - orchestrates all simulation layers
 class SimulationManager {
@@ -56,11 +58,16 @@ public:
     // Get LOD system (for WorldScene to set LODs directly)
     LODSystem* GetLODSystem() { return lod_system_.get(); }
     
+    // Get world (for WorldScene to access settlements, etc.)
+    World* GetWorld() { return world_.get(); }
+    const World* GetWorld() const { return world_.get(); }
+    
 private:
     void UpdateRegions(f32 delta_time);
     void ProcessLODTransitions();
     
-    std::vector<std::unique_ptr<Region>> regions_;
+    std::unique_ptr<World> world_;
+    std::unique_ptr<WorldGenerator> world_generator_;
     std::vector<RegionID> focus_regions_;
     std::unique_ptr<LODSystem> lod_system_;
     

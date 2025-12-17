@@ -32,6 +32,14 @@ public:
     u32 GetPopulation() const { return population_count_; }
     u32 GetCapacity() const { return capacity_; }
     
+    // Source region properties
+    bool IsSource() const { return is_source_; }
+    void SetIsSource(bool is_source) { is_source_ = is_source; }
+    const std::string& GetName() const { return name_; }
+    void SetName(const std::string& name) { name_ = name; }
+    RegionID GetSourceParentID() const { return source_parent_id_; }
+    void SetSourceParentID(RegionID parent_id) { source_parent_id_ = parent_id; }
+    
     // Population management
     void AddEntity(EntityID entity);
     void RemoveEntity(EntityID entity);
@@ -72,6 +80,11 @@ private:
     std::string subtype_;  // Influences color (e.g., "Mountain" for rural near mountains)
     u32 population_count_ = 0;
     u32 capacity_ = 10000;
+    
+    // Source region properties
+    bool is_source_ = false;  // True if this is a source region
+    std::string name_;  // Name of the region (for source regions)
+    RegionID source_parent_id_ = INVALID_REGION_ID;  // ID of source parent (if this is not a source)
     
     // Resources
     std::unordered_map<std::string, f32> resources_;

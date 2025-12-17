@@ -2,6 +2,7 @@
 #include "Scenes/SceneManager.h"
 #include "Simulation/Region.h"
 #include "Simulation/SimulationManager.h"
+#include "Simulation/World.h"
 #include "Simulation/LODSystem.h"
 #include "Core/Config.h"
 #include "Platform/IInput.h"
@@ -28,9 +29,6 @@ bool WorldScene::Initialize(Platform::PlatformManager* platform_manager) {
     grid_height_ = config.world.region_grid_height;
     region_size_ = 50.0f;  // Base pixel size
     
-    // Initialize region colors
-    InitializeRegionColors();
-    
     // Initialize simulation manager
     simulation_manager_ = std::make_unique<Simulation::SimulationManager>();
     if (!simulation_manager_->Initialize()) {
@@ -41,9 +39,12 @@ bool WorldScene::Initialize(Platform::PlatformManager* platform_manager) {
     camera_x_ = (grid_width_ * region_size_) / 2.0f;
     camera_y_ = (grid_height_ * region_size_) / 2.0f;
     
-    // Setup region grid
+    // Setup region grid (this triggers world generation which loads region definitions from JSON)
     if (simulation_manager_) {
         simulation_manager_->InitializeRegionGrid(grid_width_, grid_height_, region_size_);
+        
+        // Initialize region colors AFTER world generation (which loads region definitions from JSON)
+        InitializeRegionColors();
         
         // Debug: Verify regions were created
         const auto& regions = simulation_manager_->GetRegions();
@@ -402,19 +403,62 @@ RegionID WorldScene::GetRegionAtScreenPosition(i32 screen_x, i32 screen_y) {
 }
 
 void WorldScene::InitializeRegionColors() {
-    // Define colors for different region types
-    region_colors_["Forest"] = std::make_tuple(34, 139, 34);      // Forest green
-    region_colors_["Water"] = std::make_tuple(30, 144, 255);      // Dodger blue
-    region_colors_["Coastal"] = std::make_tuple(30, 144, 255);    // Dodger blue
-    region_colors_["Desert"] = std::make_tuple(238, 203, 173);    // Sandy brown
-    region_colors_["Plains"] = std::make_tuple(144, 238, 144);   // Light green
-    region_colors_["Urban"] = std::make_tuple(105, 105, 105);    // Dim gray
-    region_colors_["City"] = std::make_tuple(105, 105, 105);     // Dim gray
-    region_colors_["Rural"] = std::make_tuple(154, 205, 50);     // Yellow green
-    region_colors_["Mountain"] = std::make_tuple(139, 137, 137); // Dark gray
-    region_colors_["Road"] = std::make_tuple(160, 82, 45);       // Sienna
-    region_colors_["River"] = std::make_tuple(70, 130, 180);      // Steel blue
-    region_colors_["RiverSource"] = std::make_tuple(100, 150, 200); // Lighter blue for sources
+    // Clear existing colors to ensure fresh load from JSON
+    region_colors_.clear();
+    
+    // Load colors from region definitions in config
+    auto& config = Config::Configuration::GetInstance();
+    const auto& region_definitions = config.regions.region_definitions;
+    
+    // Load colors from region definitions (JSON file)
+    for (const auto& [type, def] : region_definitions) {
+        region_colors_[type] = std::make_tuple(def.color_r, def.color_g, def.color_b);
+    }
+    
+    // Only set fallback colors for types that are NOT in the JSON definitions
+    // These are legacy fallbacks in case JSON is missing some types
+    if (region_colors_.find("Forest") == region_colors_.end()) {
+        region_colors_["Forest"] = std::make_tuple(34, 139, 34);      // Forest green
+    }
+    if (region_colors_.find("Water") == region_colors_.end()) {
+        region_colors_["Water"] = std::make_tuple(30, 144, 255);      // Dodger blue
+    }
+    if (region_colors_.find("Coastal") == region_colors_.end()) {
+        region_colors_["Coastal"] = std::make_tuple(30, 144, 255);    // Dodger blue
+    }
+    if (region_colors_.find("Desert") == region_colors_.end()) {
+        region_colors_["Desert"] = std::make_tuple(238, 203, 173);    // Sandy brown
+    }
+    if (region_colors_.find("Plains") == region_colors_.end()) {
+        region_colors_["Plains"] = std::make_tuple(144, 238, 144);   // Light green
+    }
+    if (region_colors_.find("Urban") == region_colors_.end()) {
+        region_colors_["Urban"] = std::make_tuple(105, 105, 105);    // Dim gray
+    }
+    if (region_colors_.find("City") == region_colors_.end()) {
+        region_colors_["City"] = std::make_tuple(105, 105, 105);     // Dim gray
+    }
+    if (region_colors_.find("Rural") == region_colors_.end()) {
+        region_colors_["Rural"] = std::make_tuple(154, 205, 50);     // Yellow green
+    }
+    if (region_colors_.find("Mountain") == region_colors_.end()) {
+        region_colors_["Mountain"] = std::make_tuple(139, 137, 137); // Dark gray
+    }
+    if (region_colors_.find("Road") == region_colors_.end()) {
+        region_colors_["Road"] = std::make_tuple(160, 82, 45);       // Sienna
+    }
+    if (region_colors_.find("River") == region_colors_.end()) {
+        region_colors_["River"] = std::make_tuple(70, 130, 180);      // Steel blue
+    }
+    if (region_colors_.find("RiverSource") == region_colors_.end()) {
+        region_colors_["RiverSource"] = std::make_tuple(100, 150, 200); // Lighter blue for sources
+    }
+    if (region_colors_.find("Woods") == region_colors_.end()) {
+        region_colors_["Woods"] = std::make_tuple(12, 12, 34);      // Dark olive green
+    }
+    
+    // Debug output to verify colors were loaded
+    std::cout << "WorldScene: Loaded " << region_colors_.size() << " region colors from JSON" << std::endl;
 }
 
 void WorldScene::InitializeRegions() {
@@ -662,6 +706,68 @@ void WorldScene::RenderRegionStats(Platform::IVideo* video, const Simulation::Re
     
     video->SetFontSize(text_size);
     
+    // Region Name (if it's a source region)
+    const std::string& name = region->GetName();
+    if (!name.empty()) {
+        video->SetDrawColor(255, 255, 200, 255);  // Highlight name
+        video->DrawText("Name: " + name, sidebar_x + 10, y_pos, 255, 255, 200, 255);
+        y_pos += line_height;
+    }
+    
+    // Settlement Role (if it's a settlement)
+    if (simulation_manager_) {
+        const Simulation::World* world = simulation_manager_->GetWorld();
+        if (world) {
+            const auto& settlements = world->GetSettlements();
+            for (const auto& settlement : settlements) {
+                if (settlement.region_id == region->GetID()) {
+                    std::string role = settlement.type;
+                    // Determine role description based on context
+                    if (settlement.type == "City") {
+                        // Check neighbors to determine role
+                        bool near_mountain = false;
+                        bool near_water = false;
+                        bool near_forest = false;
+                        
+                        u16 grid_x = settlement.grid_x;
+                        u16 grid_y = settlement.grid_y;
+                        
+                        if (world) {
+                            const Simulation::Region* neighbors[4] = {
+                                world->GetRegionAtGrid(grid_x, grid_y - 1),
+                                world->GetRegionAtGrid(grid_x, grid_y + 1),
+                                world->GetRegionAtGrid(grid_x - 1, grid_y),
+                                world->GetRegionAtGrid(grid_x + 1, grid_y)
+                            };
+                            
+                            for (const Simulation::Region* neighbor : neighbors) {
+                                if (neighbor) {
+                                    if (neighbor->GetType() == "Mountain") near_mountain = true;
+                                    if (neighbor->GetType() == "Coastal" || neighbor->GetType() == "River") near_water = true;
+                                    if (neighbor->GetType() == "Forest") near_forest = true;
+                                }
+                            }
+                        }
+                        
+                        if (near_mountain) role = "Mountain Settlement";
+                        else if (near_water) role = "Coastal Settlement";
+                        else if (near_forest) role = "Forest Settlement";
+                        else role = "Plains Settlement";
+                    } else if (settlement.type == "Village") {
+                        role = "Village";
+                    } else if (settlement.type == "Capital") {
+                        role = "Capital";
+                    }
+                    
+                    video->SetDrawColor(200, 255, 200, 255);  // Highlight settlement role
+                    video->DrawText("Role: " + role, sidebar_x + 10, y_pos, 200, 255, 200, 255);
+                    y_pos += line_height;
+                    break;
+                }
+            }
+        }
+    }
+    
     // Region ID
     video->SetDrawColor(200, 200, 200, 255);
     video->DrawText("ID: " + std::to_string(region->GetID()), sidebar_x + 10, y_pos, 200, 200, 200, 255);
@@ -679,9 +785,31 @@ void WorldScene::RenderRegionStats(Platform::IVideo* video, const Simulation::Re
         y_pos += line_height;
     }
     
+    // Source region info
+    if (region->IsSource()) {
+        video->SetDrawColor(180, 200, 255, 255);
+        video->DrawText("Source Region", sidebar_x + 10, y_pos, 180, 200, 255, 255);
+        y_pos += line_height;
+    } else if (region->GetSourceParentID() != INVALID_REGION_ID) {
+        const Simulation::Region* parent = simulation_manager_ ? 
+            simulation_manager_->GetRegion(region->GetSourceParentID()) : nullptr;
+        if (parent) {
+            video->SetDrawColor(180, 200, 255, 255);
+            std::string parent_name = parent->GetName();
+            if (parent_name.empty()) {
+                parent_name = parent->GetType();
+            }
+            video->DrawText("Part of: " + parent_name, sidebar_x + 10, y_pos, 180, 200, 255, 255);
+            y_pos += line_height;
+        }
+    }
+    
+    y_pos += 5;  // Small gap
+    
     // Population
     u32 population = region->GetPopulation();
     u32 capacity = region->GetCapacity();
+    video->SetDrawColor(200, 200, 200, 255);
     video->DrawText("Population: " + std::to_string(population), sidebar_x + 10, y_pos, 200, 200, 200, 255);
     y_pos += line_height;
     

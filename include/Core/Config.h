@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "Simulation/RegionDefinition.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -226,6 +227,10 @@ struct RegionsConfig {
     u8 neighbor_connections_min = 2;
     u8 neighbor_connections_max = 6;
     bool race_attraction_enabled = true;
+    
+    // Region definitions (loaded from JSON)
+    std::unordered_map<std::string, Simulation::RegionDefinition> region_definitions;
+    std::string region_data_path = "assets/data/regions.json";
 };
 
 // Events configuration

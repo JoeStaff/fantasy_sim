@@ -1,0 +1,305 @@
+{
+  "regions": [
+    {
+      "type": "Plains",
+      "spawn_weight": 1.0,
+      "expansion_weight": 1.0,
+      "color": [144, 238, 144],
+      "potential_names": [
+        "The Great Plains",
+        "Golden Fields",
+        "Endless Meadows",
+        "Verdant Expanse",
+        "Rolling Hills"
+      ],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 0,
+      "max_expansion_size": 0,
+      "influence_stats": {},
+      "capacity": 10000,
+      "resource_types": ["Food", "Materials"],
+      "compatible_neighbors": ["Forest", "Rural", "Urban", "Desert"],
+      "incompatible_neighbors": []
+    },
+    {
+      "type": "Coastal",
+      "spawn_weight": 1.0,
+      "expansion_weight": 0.3,
+      "color": [30, 144, 255],
+      "potential_names": [
+        "Azure Coast",
+        "Sapphire Shore",
+        "Crystal Bay",
+        "Emerald Harbor",
+        "Pearl Beach"
+      ],
+      "min_source_count": 1,
+      "max_source_count": 8,
+      "min_expansion_size": 1,
+      "max_expansion_size": 3,
+      "influence_stats": {
+        "trade": 1.5,
+        "fishing": 2.0
+      },
+      "capacity": 15000,
+      "resource_types": ["Food", "Trade", "Materials"],
+      "compatible_neighbors": ["Plains", "Forest", "Urban", "Rural"],
+      "incompatible_neighbors": ["Mountain", "Desert"]
+    },
+    {
+      "type": "Mountain",
+      "spawn_weight": 0.8,
+      "expansion_weight": 0.6,
+      "color": [139, 137, 137],
+      "potential_names": [
+        "Ironpeak Range",
+        "Dragon's Spine",
+        "Thunderhead Mountains",
+        "Crystal Peaks",
+        "Eternal Heights",
+        "Stormwatch Ridge",
+        "Ancient Summit"
+      ],
+      "min_source_count": 3,
+      "max_source_count": 6,
+      "min_expansion_size": 15,
+      "max_expansion_size": 30,
+      "influence_stats": {
+        "mining": 2.5,
+        "defense": 1.8,
+        "isolation": 1.2
+      },
+      "capacity": 5000,
+      "resource_types": ["Materials", "Magic"],
+      "compatible_neighbors": ["Forest", "Plains"],
+      "incompatible_neighbors": ["Coastal", "Water"]
+    },
+    {
+      "type": "Forest",
+      "spawn_weight": 1.2,
+      "expansion_weight": 0.8,
+      "color": [34, 139, 34],
+      "potential_names": [
+        "Whispering Woods",
+        "Elderwood Forest",
+        "Shadowveil Grove",
+        "Moonlight Thicket",
+        "Ancient Canopy",
+        "Mystic Glade",
+        "Emerald Wilds"
+      ],
+      "min_source_count": 1,
+      "max_source_count": 2,
+      "min_expansion_size": 200,
+      "max_expansion_size": 400,
+      "influence_stats": {
+        "hunting": 1.8,
+        "wood": 2.0,
+        "nature_magic": 1.5
+      },
+      "capacity": 8000,
+      "resource_types": ["Food", "Materials", "Magic"],
+      "compatible_neighbors": ["Plains", "Mountain", "Rural"],
+      "incompatible_neighbors": ["Desert", "Coastal"]
+    },
+    {
+      "type": "River",
+      "spawn_weight": 0.0,
+      "expansion_weight": 0.5,
+      "color": [70, 130, 180],
+      "potential_names": [],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 0,
+      "max_expansion_size": 0,
+      "influence_stats": {
+        "trade": 1.3,
+        "farming": 1.5,
+        "transport": 1.4
+      },
+      "capacity": 12000,
+      "resource_types": ["Food", "Trade"],
+      "compatible_neighbors": ["Plains", "Forest", "Rural", "Urban"],
+      "incompatible_neighbors": ["Mountain"]
+    },
+    {
+      "type": "RiverSource",
+      "spawn_weight": 0.0,
+      "expansion_weight": 0.0,
+      "color": [100, 150, 200],
+      "potential_names": [
+        "Crystal Spring",
+        "Eternal Well",
+        "Mountain Source",
+        "Sacred Fountain",
+        "Life's Beginning"
+      ],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 0,
+      "max_expansion_size": 0,
+      "influence_stats": {
+        "water": 3.0,
+        "life": 2.0
+      },
+      "capacity": 5000,
+      "resource_types": ["Food", "Magic"],
+      "compatible_neighbors": ["Mountain", "Forest", "Plains"],
+      "incompatible_neighbors": []
+    },
+    {
+      "type": "Desert",
+      "spawn_weight": 0.6,
+      "expansion_weight": 0.7,
+      "color": [238, 203, 173],
+      "potential_names": [
+        "Golden Wastes",
+        "Scorched Sands",
+        "Endless Dunes",
+        "Crimson Desert",
+        "Barren Expanse",
+        "Sunfire Wasteland"
+      ],
+      "min_source_count": 1,
+      "max_source_count": 2,
+      "min_expansion_size": 150,
+      "max_expansion_size": 450,
+      "influence_stats": {
+        "isolation": 1.5,
+        "survival": 1.3,
+        "mining": 1.2
+      },
+      "capacity": 3000,
+      "resource_types": ["Materials"],
+      "compatible_neighbors": ["Plains", "Mountain"],
+      "incompatible_neighbors": ["Forest", "Coastal", "Water", "River"]
+    },
+    {
+      "type": "Water",
+      "spawn_weight": 0.3,
+      "expansion_weight": 0.2,
+      "color": [30, 144, 255],
+      "potential_names": [
+        "Crystal Lake",
+        "Mirror Pool",
+        "Deep Basin",
+        "Serene Waters",
+        "Hidden Oasis"
+      ],
+      "min_source_count": 1,
+      "max_source_count": 3,
+      "min_expansion_size": 1,
+      "max_expansion_size": 5,
+      "influence_stats": {
+        "fishing": 1.8,
+        "water": 2.5,
+        "trade": 1.2
+      },
+      "capacity": 5000,
+      "resource_types": ["Food", "Trade"],
+      "compatible_neighbors": ["Plains", "Forest", "Rural"],
+      "incompatible_neighbors": ["Mountain", "Desert"]
+    },
+    {
+      "type": "Urban",
+      "spawn_weight": 0.0,
+      "expansion_weight": 0.9,
+      "color": [105, 105, 105],
+      "potential_names": [
+        "Grand City",
+        "Capital",
+        "Metropolis",
+        "Great Settlement",
+        "Central Hub"
+      ],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 8,
+      "max_expansion_size": 20,
+      "influence_stats": {
+        "trade": 2.0,
+        "crafting": 1.8,
+        "population": 2.5,
+        "culture": 1.5
+      },
+      "capacity": 50000,
+      "resource_types": ["Food", "Materials", "Trade", "Magic"],
+      "compatible_neighbors": ["Plains", "Coastal", "River", "Rural"],
+      "incompatible_neighbors": ["Mountain", "Desert", "Forest"]
+    },
+    {
+      "type": "Rural",
+      "spawn_weight": 0.0,
+      "expansion_weight": 0.8,
+      "color": [154, 205, 50],
+      "potential_names": [
+        "Quiet Village",
+        "Farming Hamlet",
+        "Rural Settlement",
+        "Countryside Town"
+      ],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 3,
+      "max_expansion_size": 8,
+      "influence_stats": {
+        "farming": 2.0,
+        "livestock": 1.8,
+        "community": 1.5
+      },
+      "capacity": 15000,
+      "resource_types": ["Food", "Materials"],
+      "compatible_neighbors": ["Plains", "Forest", "Urban", "River"],
+      "incompatible_neighbors": ["Mountain", "Desert"]
+    },
+    {
+      "type": "Road",
+      "spawn_weight": 0.0,
+      "expansion_weight": 0.0,
+      "color": [160, 82, 45],
+      "potential_names": [],
+      "min_source_count": 0,
+      "max_source_count": 0,
+      "min_expansion_size": 0,
+      "max_expansion_size": 0,
+      "influence_stats": {
+        "trade": 1.2,
+        "travel": 1.5
+      },
+      "capacity": 0,
+      "resource_types": [],
+      "compatible_neighbors": [],
+      "incompatible_neighbors": []
+    },
+    {
+      "type": "Woods",
+      "spawn_weight": 1.0,
+      "expansion_weight": 0.6,
+      "color": [64, 199, 34],
+      "potential_names": [
+        "Small Grove",
+        "Thicket",
+        "Wooded Copse",
+        "Birch Stand",
+        "Pine Cluster",
+        "Oak Glade",
+        "Maple Patch"
+      ],
+      "min_source_count": 8,
+      "max_source_count": 20,
+      "min_expansion_size": 10,
+      "max_expansion_size": 25,
+      "influence_stats": {
+        "hunting": 1.3,
+        "wood": 1.5,
+        "nature_magic": 1.2
+      },
+      "capacity": 5000,
+      "resource_types": ["Food", "Materials"],
+      "compatible_neighbors": ["Plains", "Forest", "Rural"],
+      "incompatible_neighbors": ["Desert", "Coastal"]
+    }
+  ]
+}
+
