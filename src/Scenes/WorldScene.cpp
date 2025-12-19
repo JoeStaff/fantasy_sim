@@ -113,6 +113,11 @@ void WorldScene::ProcessInput(Platform::IInput* input) {
         return;
     }
     
+    // Quick zoom: F5 zooms out fully
+    if (input->IsKeyPressed(Platform::KeyCode::F5)) {
+        zoom_level_ = MIN_ZOOM;
+    }
+    
     // Handle Escape key to return to main menu
     if (input->IsKeyPressed(Platform::KeyCode::Escape)) {
         if (scene_manager_) {

@@ -111,6 +111,9 @@ void LoadRegionDefinitions(Config::RegionsConfig& regions_config) {
                 }
             }
             
+            // Prevent overwrite flag
+            def.prevent_overwrite = region_json.value("prevent_overwrite", false);
+            
             // Store the definition
             regions_config.region_definitions[def.type] = def;
         }
@@ -132,5 +135,6 @@ void LoadRegionDefinitions(Config::RegionsConfig& regions_config) {
 }
 
 } // namespace Simulation
+
 
 

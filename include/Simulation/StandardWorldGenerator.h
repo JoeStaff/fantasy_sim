@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Simulation/WorldGenerator.h"
+#include "Simulation/RegionDefinition.h"
 #include "Utils/Random.h"
 #include <vector>
 #include <unordered_set>
@@ -19,21 +20,31 @@ public:
     std::unique_ptr<World> Generate(u16 grid_width, u16 grid_height, f32 region_size) override;
     
 private:
-    // Generation passes
-    void Pass1_InitializePlains(World* world);
-    void Pass2_DetermineCoastalBorders(World* world);
-    void Pass3_DetermineMountains(World* world);
-    void Pass4_DetermineForests(World* world);
-    void Pass5_DetermineRivers(World* world);
-    void Pass6_DetermineDesert(World* world);
-    void Pass7_SprinkleFreshWater(World* world);
-    void Pass8_PlaceSettlements(World* world);
-    void Pass9_PathRoads(World* world);
+    // Pass 0: Initialize base layer
+    void Pass0_InitializePlains(World* world);
     
-    // Source-based generation methods
-    void GenerateSourceRegions(World* world, const std::string& region_type, const RegionDefinition& def);
-    void ExpandFromSource(World* world, RegionID source_id, const RegionDefinition& def);
-    void EnsureCompleteCoastalBorders(World* world);
+    // Determine generation order from region definitions
+    std::vector<std::string> DetermineGenerationOrder(
+        const std::unordered_map<std::string, RegionDefinition>& region_definitions);
+    
+    // Core pass methods: create sources, then expand
+    std::vector<RegionID> Pass_CreateSources(World* world, const std::string& region_type, const RegionDefinition& def);
+    void Pass_ExpandFromSource(World* world, RegionID source_id, const RegionDefinition& def);
+    
+    // Expansion helpers
+    void ExpandCoastalInland(World* world, RegionID source_id, const RegionDefinition& def, u16 source_x, u16 source_y);
+    void ExpandStandardRegion(World* world, RegionID source_id, const RegionDefinition& def, u16 source_x, u16 source_y);
+    
+    // Special passes for regions that don't follow standard pattern
+    void Pass_Coastal(World* world, const RegionDefinition& def);
+    void Pass_Rivers(World* world, const std::unordered_map<std::string, RegionDefinition>& region_definitions);
+    std::vector<RegionID> Pass_CreateRiverSources(World* world, const RegionDefinition& def);
+    void Pass_ExpandRiverFromSource(World* world, RegionID source_id, const RegionDefinition& def);
+    
+    void Pass_Settlements(World* world, const std::unordered_map<std::string, RegionDefinition>& region_definitions);
+    void Pass_Roads(World* world, const std::unordered_map<std::string, RegionDefinition>& region_definitions);
+    
+    // Utility methods
     std::string GetRandomName(const RegionDefinition& def);
     
     // Helper methods
@@ -65,6 +76,10 @@ private:
     // Desert hemisphere tracking (true = northern, false = southern)
     bool desert_northern_hemisphere_ = false;
     bool desert_hemisphere_set_ = false;
+
+    // Forest hemisphere tracking (true = northern, false = southern)
+    bool forest_northern_hemisphere_ = false;
+    bool forest_hemisphere_set_ = false;
     
     // Track which borders have coastal regions (top, bottom, left, right)
     std::unordered_set<std::string> coastal_borders_;
@@ -72,4 +87,5 @@ private:
 }; // class StandardWorldGenerator
 
 } // namespace Simulation
+
 

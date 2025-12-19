@@ -37,8 +37,10 @@ struct RegionDefinition {
     std::vector<std::string> resource_types;  // Available resources
     std::vector<std::string> compatible_neighbors;  // Types that can be neighbors
     std::vector<std::string> incompatible_neighbors;  // Types that cannot be neighbors
+    bool prevent_overwrite = false;  // If true, prevents other regions from overwriting this region type
 };
 
 } // namespace Simulation
+
 
 
