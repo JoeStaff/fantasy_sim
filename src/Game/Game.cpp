@@ -8,6 +8,7 @@
 #include "Scenes/MainMenuScene.h"
 #include "Scenes/QuitMenuScene.h"
 #include "Scenes/WorldScene.h"
+#include "Scenes/WorldSidebarScene.h"
 #include "ECS/System.h"
 
 namespace Game {
@@ -236,8 +237,13 @@ void Game::InitializeScenes() {
     scene_manager_->RegisterScene(std::make_unique<MainMenuScene>());
     scene_manager_->RegisterScene(std::make_unique<QuitMenuScene>());
     scene_manager_->RegisterScene(std::make_unique<WorldScene>());
+    scene_manager_->RegisterScene(std::make_unique<WorldSidebarScene>());
     
-    // Start with main menu
+    // Start with main menu (legacy method creates fullscreen frame)
+    // TODO: Example of grid layout usage:
+    // scene_manager_->SetGridLayout(4, 1);  // 4 columns, 1 row
+    // scene_manager_->AddSceneFrameGrid("WorldScene", 0, 0, 3, 1);  // Takes 3 columns
+    // scene_manager_->AddSceneFrameGrid("WorldSidebarScene", 3, 0, 1, 1);  // Takes 1 column
     scene_manager_->ChangeScene("MainMenu");
 }
 

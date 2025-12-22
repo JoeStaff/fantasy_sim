@@ -1,0 +1,11 @@
+---
+description: "C++ coding standards for fantasy_sim project"
+globs: ["**/*.cpp", "**/*.h"]
+alwaysApply: true
+---
+
+When working with C++ code in this project:
+- The command line environment is in Powershell
+- Build using the prebuilt build scripts (scripts/build.bat or .sh)
+- Follow the existing ECS (Entity Component System) architecture
+- Use the Platform abstraction layer (IInput, IVideo) rather than direct SDL calls

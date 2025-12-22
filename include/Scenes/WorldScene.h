@@ -83,13 +83,6 @@ private:
     
     // Helper to get region type from region
     std::string GetRegionType(Simulation::Region* region);
-    
-    // Sidebar rendering
-    void RenderSidebar(Platform::IVideo* video);
-    void RenderRegionStats(Platform::IVideo* video, const Simulation::Region* region);
-    
-    // Sidebar dimensions
-    static constexpr i32 SIDEBAR_WIDTH = 300;
 };
 
 } // namespace Game

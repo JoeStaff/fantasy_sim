@@ -7,8 +7,9 @@
 
 namespace Game {
 
-// Forward declaration
+// Forward declarations
 class SceneManager;
+class SceneFrame;
 
 // Base scene class - all scenes inherit from this
 class Scene {
@@ -36,6 +37,9 @@ public:
     
     // Set scene manager reference (for scene transitions)
     void SetSceneManager(SceneManager* manager) { scene_manager_ = manager; }
+    
+    // Get frame bounds (if scene is in a frame, returns bounds; otherwise returns window size)
+    void GetFrameBounds(i32& x, i32& y, i32& width, i32& height) const;
     
 protected:
     std::string name_;

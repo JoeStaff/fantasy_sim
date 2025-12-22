@@ -1,4 +1,5 @@
 #include "Scenes/WorldScene.h"
+#include "Scenes/WorldSidebarScene.h"
 #include "Scenes/SceneManager.h"
 #include "Simulation/Region.h"
 #include "Simulation/SimulationManager.h"
@@ -34,6 +35,9 @@ bool WorldScene::Initialize(Platform::PlatformManager* platform_manager) {
     if (!simulation_manager_->Initialize()) {
         return false;
     }
+    
+    // Share simulation manager with sidebar scene
+    WorldSceneSharedState::g_simulation_manager = simulation_manager_.get();
     
     // Center camera on world (do this before creating regions so debug output is correct)
     camera_x_ = (grid_width_ * region_size_) / 2.0f;
@@ -95,17 +99,8 @@ void WorldScene::Render(Platform::IVideo* video) {
     // Clear screen with dark background
     video->Clear(20, 20, 30, 255);
     
-    // Set viewport for main world view (leave space for sidebar)
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
-    video->SetViewport(0, 0, window_width - SIDEBAR_WIDTH, window_height);
-    
-    // Render regions
+    // Render regions (viewport is set by SceneManager to frame bounds)
     RenderRegions(video);
-    
-    // Reset viewport and render sidebar
-    video->ResetViewport();
-    RenderSidebar(video);
 }
 
 void WorldScene::ProcessInput(Platform::IInput* input) {
@@ -132,9 +127,9 @@ void WorldScene::ProcessInput(Platform::IInput* input) {
 
 void WorldScene::OnEnter() {
     // Reset camera to center when entering scene
-    camera_x_ = (grid_width_ * region_size_) / 2.0f;
-    camera_y_ = (grid_height_ * region_size_) / 2.0f;
-    zoom_level_ = 1.0f;
+    // camera_x_ = (grid_width_ * region_size_) / 2.0f;
+    // camera_y_ = (grid_height_ * region_size_) / 2.0f;
+    // zoom_level_ = 1.0f;
 }
 
 void WorldScene::OnExit() {
@@ -209,6 +204,12 @@ void WorldScene::HandleRegionSelection(Platform::IInput* input) {
     i32 mouse_x, mouse_y;
     input->GetMousePosition(mouse_x, mouse_y);
     
+    // Convert screen coordinates to frame-local coordinates
+    i32 frame_x, frame_y, frame_width, frame_height;
+    GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
+    mouse_x -= frame_x;
+    mouse_y -= frame_y;
+    
     RegionID region_id = GetRegionAtScreenPosition(mouse_x, mouse_y);
     if (region_id != INVALID_REGION_ID) {
         // Single selection - if clicking same region, deselect; otherwise select new one
@@ -217,6 +218,9 @@ void WorldScene::HandleRegionSelection(Platform::IInput* input) {
         } else {
             selected_region_id_ = region_id;
         }
+        
+        // Update shared state for sidebar scene
+        WorldSceneSharedState::g_selected_region_id = selected_region_id_;
         
         // Update simulation LOD based on selection
         UpdateSimulationLOD();
@@ -234,18 +238,17 @@ void WorldScene::RenderRegions(Platform::IVideo* video) {
         return;
     }
     
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
+    // Get frame dimensions (viewport dimensions when rendered)
+    i32 frame_x, frame_y, frame_width, frame_height;
+    GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
     
     f32 scaled_region_size = region_size_ * zoom_level_;
     
     // Calculate visible region bounds (in world coordinates)
-    // Account for sidebar width in viewport
-    i32 viewport_width = window_width - SIDEBAR_WIDTH;
-    f32 view_left = camera_x_ - (viewport_width / 2.0f) / zoom_level_;
-    f32 view_right = camera_x_ + (viewport_width / 2.0f) / zoom_level_;
-    f32 view_top = camera_y_ - (window_height / 2.0f) / zoom_level_;
-    f32 view_bottom = camera_y_ + (window_height / 2.0f) / zoom_level_;
+    f32 view_left = camera_x_ - (frame_width / 2.0f) / zoom_level_;
+    f32 view_right = camera_x_ + (frame_width / 2.0f) / zoom_level_;
+    f32 view_top = camera_y_ - (frame_height / 2.0f) / zoom_level_;
+    f32 view_bottom = camera_y_ + (frame_height / 2.0f) / zoom_level_;
     
     // Expand view bounds slightly to avoid edge cases
     view_left -= region_size_;
@@ -276,9 +279,12 @@ void WorldScene::RenderRegions(Platform::IVideo* video) {
         
         i32 screen_size = static_cast<i32>(scaled_region_size);
         
+        // Get frame dimensions for bounds checking (reuse variables from earlier)
+        GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
+        
         // Only render if region is at least partially on screen (with some margin)
-        if (screen_x + screen_size < -10 || screen_x > window_width + 10 ||
-            screen_y + screen_size < -10 || screen_y > window_height + 10) {
+        if (screen_x + screen_size < -10 || screen_x > frame_width + 10 ||
+            screen_y + screen_size < -10 || screen_y > frame_height + 10) {
             continue;
         }
         
@@ -340,40 +346,28 @@ void WorldScene::GetRegionColor(const std::string& region_type, u8& r, u8& g, u8
 }
 
 void WorldScene::WorldToScreen(f32 world_x, f32 world_y, i32& screen_x, i32& screen_y) {
-    if (!platform_manager_ || !platform_manager_->GetVideo()) {
-        screen_x = screen_y = 0;
-        return;
-    }
+    // Get frame dimensions (viewport dimensions when rendered)
+    i32 frame_x, frame_y, frame_width, frame_height;
+    GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
     
-    auto* video = platform_manager_->GetVideo();
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
-    i32 viewport_width = window_width - SIDEBAR_WIDTH;
-    
-    // Convert world coordinates to screen coordinates
-    // Account for sidebar - center viewport horizontally
-    f32 screen_fx = (world_x - camera_x_) * zoom_level_ + (viewport_width / 2.0f);
-    f32 screen_fy = (world_y - camera_y_) * zoom_level_ + (window_height / 2.0f);
+    // Convert world coordinates to screen coordinates (relative to frame)
+    // Center viewport
+    f32 screen_fx = (world_x - camera_x_) * zoom_level_ + (frame_width / 2.0f);
+    f32 screen_fy = (world_y - camera_y_) * zoom_level_ + (frame_height / 2.0f);
     
     screen_x = static_cast<i32>(screen_fx);
     screen_y = static_cast<i32>(screen_fy);
 }
 
 void WorldScene::ScreenToWorld(i32 screen_x, i32 screen_y, f32& world_x, f32& world_y) {
-    if (!platform_manager_ || !platform_manager_->GetVideo()) {
-        world_x = world_y = 0.0f;
-        return;
-    }
+    // Get frame dimensions (viewport dimensions when rendered)
+    i32 frame_x, frame_y, frame_width, frame_height;
+    GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
     
-    auto* video = platform_manager_->GetVideo();
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
-    i32 viewport_width = window_width - SIDEBAR_WIDTH;
-    
-    // Convert screen coordinates to world coordinates
-    // Account for sidebar - center viewport horizontally
-    world_x = (screen_x - (viewport_width / 2.0f)) / zoom_level_ + camera_x_;
-    world_y = (screen_y - (window_height / 2.0f)) / zoom_level_ + camera_y_;
+    // Convert screen coordinates (frame-local) to world coordinates
+    // Center viewport
+    world_x = (screen_x - (frame_width / 2.0f)) / zoom_level_ + camera_x_;
+    world_y = (screen_y - (frame_height / 2.0f)) / zoom_level_ + camera_y_;
 }
 
 RegionID WorldScene::GetRegionAtScreenPosition(i32 screen_x, i32 screen_y) {
@@ -597,19 +591,15 @@ bool WorldScene::IsRegionVisible(RegionID region_id) const {
         return false;
     }
     
-    if (!platform_manager_ || !platform_manager_->GetVideo()) {
-        return false;
-    }
-    
-    auto* video = platform_manager_->GetVideo();
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
+    // Get frame dimensions (viewport dimensions when rendered)
+    i32 frame_x, frame_y, frame_width, frame_height;
+    GetFrameBounds(frame_x, frame_y, frame_width, frame_height);
     
     // Calculate view bounds
-    f32 view_left = camera_x_ - (window_width / 2.0f) / zoom_level_;
-    f32 view_right = camera_x_ + (window_width / 2.0f) / zoom_level_;
-    f32 view_top = camera_y_ - (window_height / 2.0f) / zoom_level_;
-    f32 view_bottom = camera_y_ + (window_height / 2.0f) / zoom_level_;
+    f32 view_left = camera_x_ - (frame_width / 2.0f) / zoom_level_;
+    f32 view_right = camera_x_ + (frame_width / 2.0f) / zoom_level_;
+    f32 view_top = camera_y_ - (frame_height / 2.0f) / zoom_level_;
+    f32 view_bottom = camera_y_ + (frame_height / 2.0f) / zoom_level_;
     
     f32 world_x = region->GetX();
     f32 world_y = region->GetY();
@@ -655,192 +645,5 @@ RegionID WorldScene::GetRegionAtGridPosition(u16 grid_x, u16 grid_y) const {
     return INVALID_REGION_ID;
 }
 
-void WorldScene::RenderSidebar(Platform::IVideo* video) {
-    if (!video) {
-        return;
-    }
-    
-    i32 window_width = video->GetWindowWidth();
-    i32 window_height = video->GetWindowHeight();
-    i32 sidebar_x = window_width - SIDEBAR_WIDTH;
-    
-    // Draw sidebar background
-    video->SetDrawColor(40, 40, 50, 255);
-    video->DrawRect(sidebar_x, 0, SIDEBAR_WIDTH, window_height);
-    
-    // Draw sidebar border
-    video->SetDrawColor(60, 60, 70, 255);
-    video->DrawLine(sidebar_x, 0, sidebar_x, window_height);
-    
-    // Render region stats if a region is selected
-    if (selected_region_id_ != INVALID_REGION_ID && simulation_manager_) {
-        const Simulation::Region* region = simulation_manager_->GetRegion(selected_region_id_);
-        if (region) {
-            RenderRegionStats(video, region);
-        }
-    } else {
-        // No region selected - show placeholder text
-        video->SetDrawColor(200, 200, 200, 255);
-        video->DrawText("No region selected", sidebar_x + 10, 20, 200, 200, 200, 255);
-        video->DrawText("Click a region to view stats", sidebar_x + 10, 50, 150, 150, 150, 255);
-    }
-}
-
-void WorldScene::RenderRegionStats(Platform::IVideo* video, const Simulation::Region* region) {
-    if (!video || !region) {
-        return;
-    }
-    
-    i32 window_width = video->GetWindowWidth();
-    i32 sidebar_x = window_width - SIDEBAR_WIDTH;
-    i32 y_pos = 20;
-    const i32 line_height = 25;
-    const i32 title_size = 18;
-    const i32 text_size = 14;
-    
-    // Title
-    video->SetFontSize(title_size);
-    video->SetDrawColor(255, 255, 255, 255);
-    video->DrawText("Region Stats", sidebar_x + 10, y_pos, 255, 255, 255, 255);
-    y_pos += line_height + 10;
-    
-    // Draw separator line
-    video->SetDrawColor(100, 100, 100, 255);
-    video->DrawLine(sidebar_x + 10, y_pos, sidebar_x + SIDEBAR_WIDTH - 10, y_pos);
-    y_pos += 15;
-    
-    video->SetFontSize(text_size);
-    
-    // Region Name (if it's a source region)
-    const std::string& name = region->GetName();
-    if (!name.empty()) {
-        video->SetDrawColor(255, 255, 200, 255);  // Highlight name
-        video->DrawText("Name: " + name, sidebar_x + 10, y_pos, 255, 255, 200, 255);
-        y_pos += line_height;
-    }
-    
-    // Settlement Role (if it's a settlement)
-    if (simulation_manager_) {
-        const Simulation::World* world = simulation_manager_->GetWorld();
-        if (world) {
-            const auto& settlements = world->GetSettlements();
-            for (const auto& settlement : settlements) {
-                if (settlement.region_id == region->GetID()) {
-                    std::string role = settlement.type;
-                    // Determine role description based on context
-                    if (settlement.type == "City") {
-                        // Check neighbors to determine role
-                        bool near_mountain = false;
-                        bool near_water = false;
-                        bool near_forest = false;
-                        
-                        u16 grid_x = settlement.grid_x;
-                        u16 grid_y = settlement.grid_y;
-                        
-                        if (world) {
-                            const Simulation::Region* neighbors[4] = {
-                                world->GetRegionAtGrid(grid_x, grid_y - 1),
-                                world->GetRegionAtGrid(grid_x, grid_y + 1),
-                                world->GetRegionAtGrid(grid_x - 1, grid_y),
-                                world->GetRegionAtGrid(grid_x + 1, grid_y)
-                            };
-                            
-                            for (const Simulation::Region* neighbor : neighbors) {
-                                if (neighbor) {
-                                    if (neighbor->GetType() == "Mountain") near_mountain = true;
-                                    if (neighbor->GetType() == "Coastal" || neighbor->GetType() == "River") near_water = true;
-                                    if (neighbor->GetType() == "Forest") near_forest = true;
-                                }
-                            }
-                        }
-                        
-                        if (near_mountain) role = "Mountain Settlement";
-                        else if (near_water) role = "Coastal Settlement";
-                        else if (near_forest) role = "Forest Settlement";
-                        else role = "Plains Settlement";
-                    } else if (settlement.type == "Village") {
-                        role = "Village";
-                    } else if (settlement.type == "Capital") {
-                        role = "Capital";
-                    }
-                    
-                    video->SetDrawColor(200, 255, 200, 255);  // Highlight settlement role
-                    video->DrawText("Role: " + role, sidebar_x + 10, y_pos, 200, 255, 200, 255);
-                    y_pos += line_height;
-                    break;
-                }
-            }
-        }
-    }
-    
-    // Region ID
-    video->SetDrawColor(200, 200, 200, 255);
-    video->DrawText("ID: " + std::to_string(region->GetID()), sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height;
-    
-    // Region Type
-    std::string type = region->GetType();
-    video->DrawText("Type: " + type, sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height;
-    
-    // Region Subtype (if exists)
-    const std::string& subtype = region->GetSubtype();
-    if (!subtype.empty()) {
-        video->DrawText("Subtype: " + subtype, sidebar_x + 10, y_pos, 200, 200, 200, 255);
-        y_pos += line_height;
-    }
-    
-    // Source region info
-    if (region->IsSource()) {
-        video->SetDrawColor(180, 200, 255, 255);
-        video->DrawText("Source Region", sidebar_x + 10, y_pos, 180, 200, 255, 255);
-        y_pos += line_height;
-    } else if (region->GetSourceParentID() != INVALID_REGION_ID) {
-        const Simulation::Region* parent = simulation_manager_ ? 
-            simulation_manager_->GetRegion(region->GetSourceParentID()) : nullptr;
-        if (parent) {
-            video->SetDrawColor(180, 200, 255, 255);
-            std::string parent_name = parent->GetName();
-            if (parent_name.empty()) {
-                parent_name = parent->GetType();
-            }
-            video->DrawText("Part of: " + parent_name, sidebar_x + 10, y_pos, 180, 200, 255, 255);
-            y_pos += line_height;
-        }
-    }
-    
-    y_pos += 5;  // Small gap
-    
-    // Population
-    u32 population = region->GetPopulation();
-    u32 capacity = region->GetCapacity();
-    video->SetDrawColor(200, 200, 200, 255);
-    video->DrawText("Population: " + std::to_string(population), sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height;
-    
-    // Capacity
-    video->DrawText("Capacity: " + std::to_string(capacity), sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height;
-    
-    // Population percentage
-    f32 pop_percent = capacity > 0 ? (static_cast<f32>(population) / static_cast<f32>(capacity)) * 100.0f : 0.0f;
-    std::string pop_str = "Fullness: " + std::to_string(static_cast<int>(pop_percent)) + "%";
-    video->DrawText(pop_str, sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height + 10;
-    
-    // Position
-    video->DrawText("Position:", sidebar_x + 10, y_pos, 200, 200, 200, 255);
-    y_pos += line_height;
-    std::string pos_str = "  X: " + std::to_string(static_cast<int>(region->GetX()));
-    video->DrawText(pos_str, sidebar_x + 10, y_pos, 180, 180, 180, 255);
-    y_pos += line_height;
-    pos_str = "  Y: " + std::to_string(static_cast<int>(region->GetY()));
-    video->DrawText(pos_str, sidebar_x + 10, y_pos, 180, 180, 180, 255);
-    y_pos += line_height + 10;
-    
-    // Neighbors
-    const auto& neighbors = region->GetNeighbors();
-    video->DrawText("Neighbors: " + std::to_string(neighbors.size()), sidebar_x + 10, y_pos, 200, 200, 200, 255);
-}
 
 } // namespace Game

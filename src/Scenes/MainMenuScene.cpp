@@ -37,7 +37,11 @@ std::string MainMenuScene::GetTitle() const {
 void MainMenuScene::OnStartSelected() {
     // Transition to world scene
     if (scene_manager_) {
-        scene_manager_->ChangeScene("WorldScene");
+        scene_manager_->SetGridLayout(4, 1);
+        // WorldScene takes 3 columns (cells 0-2)
+        scene_manager_->AddSceneFrameGrid("WorldScene", 0, 0, 3, 1);
+        // WorldSidebarScene takes 1 column (cell 3)
+        scene_manager_->AddSceneFrameGrid("WorldSidebarScene", 3, 0, 1, 1);
     }
 }
 
